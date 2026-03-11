@@ -12,6 +12,10 @@ import pool from './db.js';
 import healthRoutes from './routes/health.js';
 import adminRoutes from './routes/admin.js';
 import participantsRoutes from './routes/participants.js';
+import registrationRoutes from './routes/registration.js';
+import teamsRoutes from './routes/teams.js';
+import emailsRoutes from './routes/emails.js';
+import timerRoutes from './routes/timer.js';
 
 dotenv.config();
 
@@ -32,6 +36,10 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 
 app.use('/api', healthRoutes);
 app.use('/api', adminRoutes);
 app.use('/api', participantsRoutes);
+app.use('/api', registrationRoutes);
+app.use('/api', teamsRoutes);
+app.use('/api', emailsRoutes);
+app.use('/api', timerRoutes);
 
 // POST /api/checkin — check in a participant with photo upload
 app.post('/api/checkin', authMiddleware, upload.single('photo'), async (req, res) => {
