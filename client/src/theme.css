@@ -1,0 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --sg-black: #0f0f1a;
+  --sg-black-deep: #0a0a12;
+  --sg-pink: #E91E7B;
+  --sg-pink-dim: rgba(233, 30, 123, 0.15);
+  --sg-pink-glow: rgba(233, 30, 123, 0.4);
+  --sg-green: #0B6E4F;
+  --sg-green-bright: #067a52;
+  --sg-green-dim: rgba(11, 110, 79, 0.15);
+  --sg-red: #ff0040;
+  --sg-red-dim: rgba(255, 0, 64, 0.15);
+  --sg-gold: #c9a84c;
+  --sg-white: #ffffff;
+  --sg-off-white: #e0e0e0;
+  --sg-gray: #888;
+  --sg-dark-gray: #333;
+  --font-number: 'Black Ops One', cursive;
+  --font-body: 'Inter', system-ui, sans-serif;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--sg-black);
+  color: var(--sg-white);
+  -webkit-font-smoothing: antialiased;
+}
+
+.sg-shapes {
+  letter-spacing: 8px;
+  color: var(--sg-pink);
+}
