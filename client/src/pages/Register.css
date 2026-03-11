@@ -1,0 +1,117 @@
+.register-page {
+  min-height: 100vh;
+  background: var(--sg-black-deep);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  overflow-y: auto;
+}
+
+.register-card {
+  background: #1a1a2e;
+  border: 1px solid #333;
+  border-radius: 16px;
+  padding: 40px;
+  max-width: 700px;
+  width: 100%;
+  position: relative;
+}
+
+.register-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 40px;
+  right: 40px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--sg-pink), transparent);
+}
+
+.register-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.register-header h1 {
+  font-family: var(--font-number);
+  color: var(--sg-pink);
+  font-size: 28px;
+  margin: 12px 0 4px;
+}
+
+.register-header .player-num {
+  font-family: var(--font-number);
+  font-size: 48px;
+  color: var(--sg-green-bright);
+}
+
+.member-section {
+  border: 1px solid #2a2a3e;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  background: rgba(15, 15, 26, 0.5);
+}
+
+.member-section h3 {
+  font-family: var(--font-number);
+  color: var(--sg-gold);
+  font-size: 13px;
+  margin-bottom: 12px;
+  letter-spacing: 2px;
+}
+
+.register-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.register-field label {
+  display: block;
+  color: #888;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.register-field input {
+  width: 100%;
+  padding: 10px 12px;
+  background: #0f0f1a;
+  border: 1px solid #333;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.register-field input:focus {
+  border-color: var(--sg-pink);
+}
+
+.register-submit {
+  width: 100%;
+  padding: 14px;
+  background: var(--sg-pink);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: opacity 0.15s;
+}
+
+.register-submit:hover { opacity: 0.9; }
+.register-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+@media (max-width: 600px) {
+  .register-grid { grid-template-columns: 1fr; }
+  .register-card { padding: 24px 16px; }
+}
