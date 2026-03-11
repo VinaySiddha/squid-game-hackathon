@@ -1,0 +1,66 @@
+.admin-layout {
+  display: flex;
+  height: 100vh;
+  background: var(--sg-black-deep);
+}
+
+.admin-sidebar {
+  width: 220px;
+  background: #1a1a2e;
+  border-right: 1px solid #333;
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-sidebar h2 {
+  font-family: var(--font-number);
+  color: var(--sg-pink);
+  font-size: 16px;
+  padding: 0 20px;
+  margin-bottom: 24px;
+}
+
+.admin-sidebar button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 12px 20px;
+  background: none;
+  border: none;
+  color: var(--sg-gray);
+  font-size: 14px;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: all 0.15s;
+  font-family: var(--font-body);
+}
+
+.admin-sidebar button:hover {
+  background: rgba(233, 30, 123, 0.05);
+  color: var(--sg-white);
+}
+
+.admin-sidebar button.active {
+  color: var(--sg-pink);
+  border-left-color: var(--sg-pink);
+  background: rgba(233, 30, 123, 0.1);
+}
+
+.admin-sidebar .logout-btn {
+  margin-top: auto;
+  color: var(--sg-red);
+}
+
+.admin-content {
+  flex: 1;
+  padding: 24px 32px;
+  overflow-y: auto;
+}
+
+.admin-content h1 {
+  font-family: var(--font-number);
+  font-size: 22px;
+  color: var(--sg-pink);
+  margin-bottom: 20px;
+}
