@@ -16,6 +16,7 @@ import registrationRoutes from './routes/registration.js';
 import teamsRoutes from './routes/teams.js';
 import emailsRoutes from './routes/emails.js';
 import timerRoutes from './routes/timer.js';
+import settingsRoutes from './routes/settings.js';
 
 dotenv.config();
 
@@ -40,6 +41,7 @@ app.use('/api', registrationRoutes);
 app.use('/api', teamsRoutes);
 app.use('/api', emailsRoutes);
 app.use('/api', timerRoutes);
+app.use('/api', settingsRoutes);
 
 // POST /api/checkin — check in a participant with photo upload
 app.post('/api/checkin', authMiddleware, upload.single('photo'), async (req, res) => {

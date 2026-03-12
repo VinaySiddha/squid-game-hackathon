@@ -1,0 +1,54 @@
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: squid_game_hackathon
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  server:
+    image: ${DOCKERHUB_USER}/squid-game-server:latest
+    restart: always
+    ports:
+      - "3001:3001"
+    environment:
+      PORT: 3001
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: squid_game_hackathon
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      FRONTEND_URL: ${FRONTEND_URL}
+    volumes:
+      - uploads_data:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+
+  client:
+    image: ${DOCKERHUB_USER}/squid-game-client:latest
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - server
+
+volumes:
+  mysql_data:
+  uploads_data:

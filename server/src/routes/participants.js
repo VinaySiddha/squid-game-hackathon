@@ -19,8 +19,11 @@ router.get('/participants', async (req, res) => {
 });
 
 // POST /api/participants/bulk — create many participants (admin)
+// Body: { participants: [{player_number, name, email}], isLeader: true/false }
+// isLeader=true → generates registration token (team leaders who fill registration form)
+// isLeader=false → no token (regular participants, just get invitation email)
 router.post('/participants/bulk', authMiddleware, async (req, res) => {
-  const { participants } = req.body;
+  const { participants, isLeader } = req.body;
   if (!Array.isArray(participants) || participants.length === 0) {
     return res.status(400).json({ error: 'participants array required' });
   }
@@ -29,17 +32,12 @@ router.post('/participants/bulk', authMiddleware, async (req, res) => {
   try {
     await conn.beginTransaction();
 
-    const [maxRow] = await conn.query(
-      'SELECT MAX(CAST(player_number AS UNSIGNED)) as max_num FROM participants'
-    );
-    let nextNum = (maxRow[0].max_num || 0) + 1;
-
     const created = [];
     for (const p of participants) {
-      if (!p.name || !p.email) continue;
+      if (!p.player_number || !p.name || !p.email) continue;
 
-      const playerNumber = String(nextNum).padStart(3, '0');
-      const token = uuidv4().replace(/-/g, '').slice(0, 32);
+      const playerNumber = String(p.player_number).padStart(3, '0');
+      const token = isLeader ? uuidv4().replace(/-/g, '').slice(0, 32) : null;
 
       await conn.query(
         `INSERT INTO participants (player_number, name, email, registration_token)
@@ -53,7 +51,6 @@ router.post('/participants/bulk', authMiddleware, async (req, res) => {
         email: p.email.trim().toLowerCase(),
         registration_token: token,
       });
-      nextNum++;
     }
 
     await conn.commit();
@@ -61,7 +58,7 @@ router.post('/participants/bulk', authMiddleware, async (req, res) => {
   } catch (err) {
     await conn.rollback();
     if (err.code === 'ER_DUP_ENTRY') {
-      return res.status(409).json({ error: 'Duplicate email found: ' + err.message });
+      return res.status(409).json({ error: 'Duplicate entry found: ' + err.message });
     }
     res.status(500).json({ error: err.message });
   } finally {
@@ -145,6 +142,21 @@ router.post('/participants/eliminate-bulk', authMiddleware, async (req, res) => 
     );
     getIO().emit('participant:eliminate-bulk', rows);
     res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE /api/participants/:id — delete a participant (admin)
+router.delete('/participants/:id', authMiddleware, async (req, res) => {
+  const { id } = req.params;
+  try {
+    await pool.query('DELETE FROM team_members WHERE participant_id = ?', [id]);
+    const [result] = await pool.query('DELETE FROM participants WHERE id = ?', [id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Participant not found' });
+    }
+    res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

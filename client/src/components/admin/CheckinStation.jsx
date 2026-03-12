@@ -43,14 +43,17 @@ export default function CheckinStation() {
   return (
     <div>
       <h1>CHECK-IN STATION</h1>
-      <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
-        <Webcam ref={webcamRef} width={400} height={300} />
-        <form onSubmit={handleSubmit} style={{ flex: 1 }}>
+      <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+        <div style={{ flex: '1 1 280px', minWidth: 0 }}>
+          <Webcam ref={webcamRef} width={400} height={300} />
+        </div>
+        <form onSubmit={handleSubmit} style={{ flex: '1 1 200px', minWidth: 200 }}>
           <label style={{ display: 'block', color: 'var(--sg-gray)', fontSize: 12, letterSpacing: 2, marginBottom: 8 }}>
             PLAYER NUMBER
           </label>
           <input
             type="text"
+            inputMode="numeric"
             value={playerNumber}
             onChange={(e) => setPlayerNumber(e.target.value.replace(/\D/g, '').slice(0, 3))}
             placeholder="001"

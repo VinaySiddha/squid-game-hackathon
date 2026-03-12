@@ -2,7 +2,7 @@ import { Router } from 'express';
 import nodemailer from 'nodemailer';
 import pool from '../db.js';
 import { authMiddleware } from '../auth.js';
-import { buildRegistrationEmail } from '../email-template.js';
+import { buildInvitationEmail } from '../email-template.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -22,7 +22,7 @@ router.post('/emails/send', authMiddleware, async (req, res) => {
 
   try {
     const [participants] = await pool.query(
-      'SELECT id, player_number, name, email, registration_token FROM participants WHERE registration_token IS NOT NULL AND email_sent_at IS NULL'
+      'SELECT id, player_number, name, email, registration_token FROM participants WHERE email_sent_at IS NULL'
     );
 
     if (participants.length === 0) {
@@ -34,8 +34,11 @@ router.post('/emails/send', authMiddleware, async (req, res) => {
     const errors = [];
 
     for (const p of participants) {
-      const registrationUrl = `${process.env.FRONTEND_URL}/register/${p.registration_token}`;
-      const html = buildRegistrationEmail(p.player_number, p.name, registrationUrl);
+      // Only team leaders (with tokens) get registration link; others just get the invitation
+      const registrationUrl = p.registration_token
+        ? `${process.env.FRONTEND_URL}/register/${p.registration_token}`
+        : null;
+      const html = buildInvitationEmail(p.player_number, p.name, registrationUrl);
 
       try {
         await transporter.sendMail({

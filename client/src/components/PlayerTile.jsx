@@ -19,16 +19,16 @@ export default function PlayerTile({ participant }) {
 
   const numberStyle = {
     position: 'absolute',
-    bottom: 0,
+    bottom: 2,
     left: 0,
     right: 0,
-    background: 'rgba(0,0,0,0.7)',
-    color: is_alive ? '#0B6E4F' : '#ff0040',
+    color: '#fff',
     fontFamily: 'var(--font-number)',
-    fontSize: '10px',
+    fontSize: '11px',
     textAlign: 'center',
-    padding: '1px 0',
     lineHeight: 1,
+    textShadow: '0 0 4px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.7)',
+    pointerEvents: 'none',
   };
 
   const placeholderStyle = {
@@ -43,23 +43,6 @@ export default function PlayerTile({ participant }) {
     fontSize: '14px',
   };
 
-  const eliminatedOverlay = is_checked_in && !is_alive ? (
-    <div style={{
-      position: 'absolute',
-      inset: 0,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: 'rgba(255, 0, 64, 0.15)',
-      color: '#ff0040',
-      fontSize: '28px',
-      fontWeight: 'bold',
-      pointerEvents: 'none',
-    }}>
-      ✕
-    </div>
-  ) : null;
-
   return (
     <div style={tileStyle}>
       {is_checked_in && photo_url ? (
@@ -67,7 +50,6 @@ export default function PlayerTile({ participant }) {
       ) : (
         <div style={placeholderStyle}>{player_number}</div>
       )}
-      {eliminatedOverlay}
       <div style={numberStyle}>{player_number}</div>
     </div>
   );

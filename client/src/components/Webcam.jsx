@@ -44,8 +44,14 @@ const Webcam = forwardRef(function Webcam({ width = 320, height = 240 }, ref) {
   useImperativeHandle(ref, () => ({ capture }), [capture]);
 
   return (
-    <div>
-      <video ref={videoRef} autoPlay playsInline muted style={{ width, height, borderRadius: 8, background: '#000' }} />
+    <div style={{ width: '100%', maxWidth: width }}>
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        muted
+        style={{ width: '100%', height: 'auto', borderRadius: 8, background: '#000', display: 'block' }}
+      />
       <canvas ref={canvasRef} style={{ display: 'none' }} />
     </div>
   );

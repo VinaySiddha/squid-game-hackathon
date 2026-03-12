@@ -14,6 +14,14 @@ export function initSocket(httpServer, corsOrigin) {
       io.emit('audio:update', data);
     });
 
+    socket.on('announce', (data) => {
+      io.emit('announce', data);
+    });
+
+    socket.on('timer:show', (visible) => {
+      io.emit('timer:show', visible);
+    });
+
     socket.on('disconnect', () => {
       console.log('Client disconnected:', socket.id);
     });

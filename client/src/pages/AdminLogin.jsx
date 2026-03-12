@@ -28,17 +28,17 @@ export default function AdminLogin() {
   return (
     <div style={{
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'var(--sg-black-deep)',
+      background: 'var(--sg-black-deep)', padding: 16,
     }}>
       <form onSubmit={handleSubmit} style={{
-        background: '#1a1a2e', padding: 40, borderRadius: 12,
-        border: '1px solid #333', width: 360, textAlign: 'center',
+        background: '#1a1a2e', padding: '32px 24px', borderRadius: 12,
+        border: '1px solid #333', width: '100%', maxWidth: 360, textAlign: 'center',
       }}>
         <SquidShapes size={28} />
-        <h1 style={{ fontFamily: 'var(--font-number)', color: 'var(--sg-pink)', fontSize: 24, margin: '16px 0' }}>
+        <h1 style={{ fontFamily: 'var(--font-number)', color: 'var(--sg-pink)', fontSize: 22, margin: '16px 0' }}>
           ADMIN ACCESS
         </h1>
-        {error && <p style={{ color: 'var(--sg-red)', marginBottom: 12 }}>{error}</p>}
+        {error && <p style={{ color: 'var(--sg-red)', marginBottom: 12, fontSize: 14 }}>{error}</p>}
         <input
           type="password"
           value={password}

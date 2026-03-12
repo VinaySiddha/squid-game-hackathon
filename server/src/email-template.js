@@ -1,4 +1,22 @@
-export function buildRegistrationEmail(playerNumber, name, registrationUrl) {
+export function buildInvitationEmail(playerNumber, name, registrationUrl) {
+  const hasRegistrationLink = !!registrationUrl;
+
+  const registrationBlock = hasRegistrationLink ? `
+    <div class="message">
+      You are the <strong>Team Leader</strong>. Register your team using the link below.<br>
+      Fill in your team name and all member details. You have one chance.
+    </div>
+    <a href="${registrationUrl}" class="btn">Register Your Team</a>
+    <div class="footer">Do not share this link. It is unique to you.</div>
+  ` : `
+    <div class="message">
+      Your team leader will register your team on your behalf.<br>
+      Report to the venue on event day with your player number.<br>
+      The game begins soon.
+    </div>
+    <div class="footer">Await further instructions.</div>
+  `;
+
   return `
 <!DOCTYPE html>
 <html>
@@ -22,12 +40,7 @@ export function buildRegistrationEmail(playerNumber, name, registrationUrl) {
     <div class="shapes">&#9675; &#9651; &#9632;</div>
     <div class="player-number">${playerNumber}</div>
     <div class="name">${name}</div>
-    <div class="message">
-      You have been selected to participate in the Squid Game Hackathon.<br>
-      Register your team using the link below. You have one chance.
-    </div>
-    <a href="${registrationUrl}" class="btn">Register Your Team</a>
-    <div class="footer">Do not share this link. It is unique to you.</div>
+    ${registrationBlock}
   </div>
 </body>
 </html>`;

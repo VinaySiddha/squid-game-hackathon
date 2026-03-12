@@ -1,11 +1,18 @@
 import { useState, useEffect } from 'react';
 import { apiFetch } from '../../api';
+import socket from '../../socket';
 import Timer from '../Timer';
 
 export default function TimerControls() {
   const [timerState, setTimerState] = useState({ timer_end_time: null, timer_running: false, timer_paused_remaining: null });
   const [hours, setHours] = useState('24');
   const [minutes, setMinutes] = useState('0');
+  const [showing, setShowing] = useState(false);
+
+  useEffect(() => {
+    socket.connect();
+    return () => socket.disconnect();
+  }, []);
 
   const fetchTimer = async () => {
     try {
@@ -35,6 +42,12 @@ export default function TimerControls() {
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const toggleShowTimer = () => {
+    const next = !showing;
+    setShowing(next);
+    socket.emit('timer:show', next);
   };
 
   return (
@@ -75,7 +88,7 @@ export default function TimerControls() {
         </button>
       </div>
 
-      <div style={{ display: 'flex', gap: 8 }}>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
         <button onClick={() => action('start')} style={{
           flex: 1, padding: 12, background: 'var(--sg-green)', color: '#fff',
           border: 'none', borderRadius: 8, cursor: 'pointer', fontSize: 14, letterSpacing: 2,
@@ -95,6 +108,18 @@ export default function TimerControls() {
           RESET
         </button>
       </div>
+
+      <button onClick={toggleShowTimer} style={{
+        width: '100%', padding: 14,
+        background: showing ? '#ff0040' : '#E91E7B',
+        color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer',
+        fontSize: 16, fontWeight: 'bold', letterSpacing: 3,
+      }}>
+        {showing ? 'HIDE TIMER FROM WALL' : 'SHOW TIMER ON WALL'}
+      </button>
+      <p style={{ color: '#666', fontSize: 11, marginTop: 6, textAlign: 'center' }}>
+        {showing ? 'Timer is visible on the projector wall' : 'Timer is hidden from the projector wall'}
+      </p>
     </div>
   );
 }

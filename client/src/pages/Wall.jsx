@@ -4,22 +4,47 @@ import PlayerTile from '../components/PlayerTile';
 import Timer from '../components/Timer';
 import useAudioPlayer from '../components/useAudioPlayer';
 import SquidShapes from '../components/SquidShapes';
+import CelebrationPopup from '../components/CelebrationPopup';
 import './Wall.css';
 
-const TOTAL_SLOTS = 300;
+function computeGrid(total) {
+  // Find best columns x rows that fits 1920x1080 (16:9)
+  // Target aspect ratio per tile ~ 1.0-1.5 (portrait-ish)
+  let bestCols = 20;
+  for (let cols = Math.ceil(Math.sqrt(total * 16 / 9)); cols >= 5; cols--) {
+    const rows = Math.ceil(total / cols);
+    if (cols * rows >= total) {
+      bestCols = cols;
+      break;
+    }
+  }
+  const bestRows = Math.ceil(total / bestCols);
+  return { cols: bestCols, rows: bestRows };
+}
 
 export default function Wall() {
   const [participants, setParticipants] = useState([]);
+  const [totalSlots, setTotalSlots] = useState(300);
   const [timerState, setTimerState] = useState({ timer_end_time: null, timer_running: false });
   const [started, setStarted] = useState(false);
   const [expired, setExpired] = useState(false);
+  const [announcement, setAnnouncement] = useState(null);
+  const [showTimer, setShowTimer] = useState(false);
   const audioRef = useRef(null);
 
   const fetchAll = useCallback(async () => {
     try {
+      const res = await fetch('/api/settings/total-participants');
+      const data = await res.json();
+      if (data.total_participants) setTotalSlots(data.total_participants);
+    } catch (err) {
+      console.error('Failed to fetch total participants setting:', err);
+    }
+
+    try {
       const res = await fetch('/api/participants');
       const data = await res.json();
-      setParticipants(data);
+      if (Array.isArray(data)) setParticipants(data);
     } catch (err) {
       console.error('Failed to fetch participants:', err);
     }
@@ -27,7 +52,7 @@ export default function Wall() {
     try {
       const res = await fetch('/api/timer');
       const data = await res.json();
-      setTimerState(data);
+      if (data && !data.error) setTimerState(data);
     } catch (err) {
       console.error('Failed to fetch timer:', err);
     }
@@ -78,34 +103,39 @@ export default function Wall() {
       setExpired(false);
     });
 
+    socket.on('timer:show', (visible) => {
+      setShowTimer(visible);
+    });
+
+    socket.on('announce', (data) => {
+      setParticipants(prev => {
+        const num = String(data.player_number).padStart(3, '0');
+        const found = prev.find(p => p.player_number === num);
+        setAnnouncement({ ...data, photo_url: found?.photo_url || null });
+        return prev;
+      });
+    });
+
     return () => {
       socket.off('participant:checkin');
       socket.off('participant:eliminate');
       socket.off('participant:revive');
       socket.off('participant:eliminate-bulk');
       socket.off('timer:update');
+      socket.off('timer:show');
+      socket.off('announce');
       socket.off('reconnect');
       socket.disconnect();
     };
   }, [fetchAll]);
 
-  const grid = [];
-  const participantMap = {};
-  for (const p of participants) {
-    if (p.player_number) {
-      participantMap[p.player_number] = p;
-    }
-  }
-  for (let i = 1; i <= TOTAL_SLOTS; i++) {
-    const num = String(i).padStart(3, '0');
-    grid.push(participantMap[num] || {
-      player_number: num,
-      photo_url: null,
-      is_alive: true,
-      is_checked_in: false,
-    });
-  }
+  // Only show slots that exist in DB — deleted numbers disappear from grid
+  const grid = participants
+    .filter(p => p.player_number)
+    .sort((a, b) => a.player_number.localeCompare(b.player_number));
 
+  const slotCount = grid.length || totalSlots;
+  const { cols, rows } = computeGrid(slotCount);
   const aliveCount = participants.filter(p => p.is_alive && p.is_checked_in).length;
 
   const handleStart = () => {
@@ -130,24 +160,48 @@ export default function Wall() {
     );
   }
 
+  const gridStyle = {
+    display: 'grid',
+    gridTemplateColumns: `repeat(${cols}, 1fr)`,
+    gridTemplateRows: `repeat(${rows}, 1fr)`,
+    width: '100%',
+    height: '100%',
+    gap: 0,
+  };
+
   return (
     <div className="wall-container">
-      <div className="wall-grid">
+      <div style={gridStyle}>
         {grid.map((p) => (
           <PlayerTile key={p.player_number} participant={p} />
         ))}
       </div>
 
-      <div className={`wall-overlay ${expired ? 'wall-expired-flash' : ''}`}>
-        <SquidShapes size={20} />
-        <Timer
-          endTime={timerState.timer_end_time}
-          isRunning={timerState.timer_running}
-          onExpire={handleTimerExpire}
+
+      {showTimer && (
+        <div className="wall-timer-overlay">
+          <SquidShapes size={40} />
+          <div className="wall-timer-big">
+            <Timer
+              endTime={timerState.timer_end_time}
+              isRunning={timerState.timer_running}
+              onExpire={handleTimerExpire}
+            />
+          </div>
+          <SquidShapes size={40} />
+        </div>
+      )}
+
+      {announcement && (
+        <CelebrationPopup
+          type={announcement.type}
+          playerNumber={announcement.player_number}
+          name={announcement.name}
+          teamName={announcement.team_name}
+          photoUrl={announcement.photo_url}
+          onClose={() => setAnnouncement(null)}
         />
-        <span className="player-count">ALIVE: {aliveCount} / {TOTAL_SLOTS}</span>
-        <SquidShapes size={20} />
-      </div>
+      )}
     </div>
   );
 }
