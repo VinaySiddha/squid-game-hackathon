@@ -6,8 +6,112 @@
   background: #000;
 }
 
-/* Grid is now set via inline styles for dynamic cols/rows */
 
+/* ─── Splash Start Screen ─── */
+.wall-start-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  z-index: 100;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.wall-start-bg {
+  position: absolute;
+  inset: 0;
+  background-image: url('/images/squid-game-poster.jpg');
+  background-size: cover;
+  background-position: center top;
+  filter: brightness(0.6);
+  animation: slowZoom 20s ease-in-out infinite alternate;
+}
+
+@keyframes slowZoom {
+  from { transform: scale(1); }
+  to { transform: scale(1.08); }
+}
+
+.wall-start-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(transparent 40%, rgba(0,0,0,0.95) 100%);
+  pointer-events: none;
+}
+
+.wall-start-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding-bottom: 60px;
+}
+
+.wall-start-shapes {
+  letter-spacing: 20px;
+  font-size: 32px;
+  margin-bottom: 16px;
+  animation: shapePulse 3s ease-in-out infinite;
+}
+
+.wall-start-shapes svg {
+  filter: drop-shadow(0 0 12px var(--sg-pink));
+}
+
+@keyframes shapePulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.wall-start-title {
+  font-family: var(--font-number);
+  font-size: 72px;
+  color: var(--sg-pink);
+  text-shadow: 0 0 60px rgba(233, 30, 123, 0.6), 0 0 120px rgba(233, 30, 123, 0.3);
+  letter-spacing: 12px;
+  margin-bottom: 8px;
+  animation: titleGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes titleGlow {
+  from { text-shadow: 0 0 40px rgba(233, 30, 123, 0.4), 0 0 80px rgba(233, 30, 123, 0.2); }
+  to { text-shadow: 0 0 60px rgba(233, 30, 123, 0.8), 0 0 120px rgba(233, 30, 123, 0.4); }
+}
+
+.wall-start-subtitle {
+  font-family: var(--font-number);
+  font-size: 16px;
+  color: var(--sg-gold);
+  letter-spacing: 8px;
+  text-transform: uppercase;
+  margin-bottom: 30px;
+}
+
+.wall-start-prompt {
+  font-size: 14px;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.wall-start-line {
+  width: 60px;
+  height: 2px;
+  background: var(--sg-pink);
+  margin: 16px auto;
+  box-shadow: 0 0 10px var(--sg-pink);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+/* ─── Grid ─── */
 .wall-overlay {
   position: fixed;
   bottom: 0;
@@ -35,37 +139,7 @@
   color: var(--sg-green-bright);
 }
 
-.wall-start-overlay {
-  position: fixed;
-  inset: 0;
-  background: var(--sg-black-deep);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  z-index: 100;
-  cursor: pointer;
-}
-
-.wall-start-overlay h1 {
-  font-family: var(--font-number);
-  font-size: 48px;
-  color: var(--sg-pink);
-  margin-bottom: 20px;
-}
-
-.wall-start-overlay p {
-  font-size: 18px;
-  color: var(--sg-gray);
-  animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 1; }
-}
-
-/* Big fullscreen timer overlay */
+/* ─── Timer Overlay ─── */
 .wall-timer-overlay {
   position: fixed;
   inset: 0;
@@ -103,9 +177,109 @@
   50% { background: rgba(255, 0, 64, 0.4); }
 }
 
+/* ─── Mingle Dice Overlay ─── */
+.wall-dice-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(0, 0, 0, 0.92);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  animation: timerFadeIn 0.3s ease-out;
+}
+
+.wall-dice-label {
+  font-family: var(--font-number);
+  font-size: 28px;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 6px;
+}
+
+.wall-dice {
+  width: 240px;
+  height: 240px;
+  border-radius: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wall-dice.rolling {
+  background: linear-gradient(135deg, #2a1a3e, #1a0a2e);
+  border: 4px solid rgba(233, 30, 123, 0.4);
+  box-shadow: 0 0 60px rgba(233, 30, 123, 0.3);
+  animation: wallDiceShake 0.08s ease-in-out infinite;
+}
+
+.wall-dice.landed {
+  background: linear-gradient(135deg, #E91E7B, #b8155f);
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  box-shadow:
+    0 0 80px rgba(233, 30, 123, 0.7),
+    0 0 160px rgba(233, 30, 123, 0.3);
+  animation: wallDiceLand 0.5s ease-out;
+}
+
+.wall-dice-number {
+  font-family: var(--font-number);
+  font-size: 140px;
+  line-height: 1;
+}
+
+.wall-dice.rolling .wall-dice-number {
+  color: var(--sg-pink);
+  opacity: 0.6;
+}
+
+.wall-dice.landed .wall-dice-number {
+  color: #fff;
+  text-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  animation: wallNumberPop 0.4s ease-out;
+}
+
+.wall-dice-result-text {
+  font-family: var(--font-number);
+  font-size: 48px;
+  color: var(--sg-gold);
+  letter-spacing: 12px;
+  text-shadow: 0 0 40px rgba(201, 168, 76, 0.6);
+  animation: wallGoFlash 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes wallDiceShake {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  25% { transform: translateX(-4px) rotate(-3deg); }
+  75% { transform: translateX(4px) rotate(3deg); }
+}
+
+@keyframes wallDiceLand {
+  0% { transform: scale(1.4) rotate(8deg); }
+  40% { transform: scale(0.85) rotate(-3deg); }
+  70% { transform: scale(1.08) rotate(1deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+@keyframes wallNumberPop {
+  0% { transform: scale(0.3); opacity: 0; }
+  60% { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes wallGoFlash {
+  from { opacity: 0.6; }
+  to { opacity: 1; }
+}
+
 @media (max-width: 600px) {
-  .wall-start-overlay h1 { font-size: 28px; }
-  .wall-start-overlay p { font-size: 14px; }
+  .wall-start-title { font-size: 36px; letter-spacing: 6px; }
+  .wall-start-subtitle { font-size: 11px; letter-spacing: 4px; }
+  .wall-start-shapes { font-size: 20px; }
   .wall-timer-big { font-size: 60px; letter-spacing: 4px; }
   .wall-timer-overlay { gap: 16px; }
+  .wall-dice { width: 160px; height: 160px; }
+  .wall-dice-number { font-size: 96px; }
+  .wall-dice-label { font-size: 20px; }
 }

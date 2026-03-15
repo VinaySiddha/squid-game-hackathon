@@ -9,18 +9,26 @@ import TimerControls from '../components/admin/TimerControls';
 import AudioControls from '../components/admin/AudioControls';
 import AnnounceWinner from '../components/admin/AnnounceWinner';
 import Settings from '../components/admin/Settings';
+import Level1Controls from '../components/admin/Level1Controls';
+import Level2Controls from '../components/admin/Level2Controls';
+import Level3Controls from '../components/admin/Level3Controls';
+import Level4Controls from '../components/admin/Level4Controls';
 import './Admin.css';
 
 const sections = [
-  { key: 'dashboard', label: 'Dashboard' },
-  { key: 'checkin', label: 'Check-in Station' },
-  { key: 'players', label: 'Players' },
-  { key: 'teams', label: 'Teams' },
-  { key: 'emails', label: 'Send Emails' },
-  { key: 'timer', label: 'Timer' },
-  { key: 'audio', label: 'Audio' },
-  { key: 'announce', label: 'Announce Winner' },
-  { key: 'settings', label: 'Settings' },
+  { key: 'dashboard', label: 'Dashboard', group: 'general' },
+  { key: 'checkin', label: 'Check-in Station', group: 'general' },
+  { key: 'players', label: 'Players', group: 'general' },
+  { key: 'teams', label: 'Teams', group: 'general' },
+  { key: 'emails', label: 'Send Emails', group: 'general' },
+  { key: 'timer', label: 'Timer', group: 'general' },
+  { key: 'audio', label: 'Audio', group: 'general' },
+  { key: 'announce', label: 'Announce Winner', group: 'general' },
+  { key: 'settings', label: 'Settings', group: 'general' },
+  { key: 'level1', label: 'Level 1: RLGL', group: 'games', color: '#E91E7B' },
+  { key: 'level2', label: 'Level 2: Disappearing', group: 'games', color: '#d4a03c' },
+  { key: 'level3', label: 'Level 3: Tug of War', group: 'games', color: '#067a52' },
+  { key: 'level4', label: 'Level 4: Glass Bridge', group: 'games', color: '#4a90d9' },
 ];
 
 export default function Admin() {
@@ -55,9 +63,16 @@ export default function Admin() {
       case 'audio': return <AudioControls />;
       case 'announce': return <AnnounceWinner />;
       case 'settings': return <Settings />;
+      case 'level1': return <Level1Controls />;
+      case 'level2': return <Level2Controls />;
+      case 'level3': return <Level3Controls />;
+      case 'level4': return <Level4Controls />;
       default: return null;
     }
   };
+
+  const generalSections = sections.filter(s => s.group === 'general');
+  const gameSections = sections.filter(s => s.group === 'games');
 
   return (
     <div className="admin-layout">
@@ -67,8 +82,20 @@ export default function Admin() {
       <div className={`admin-sidebar-backdrop ${menuOpen ? 'open' : ''}`} onClick={() => setMenuOpen(false)} />
       <nav className={`admin-sidebar ${menuOpen ? 'open' : ''}`}>
         <h2>◯ △ ▢ ADMIN</h2>
-        {sections.map(s => (
+        {generalSections.map(s => (
           <button key={s.key} className={active === s.key ? 'active' : ''} onClick={() => handleNav(s.key)}>
+            {s.label}
+          </button>
+        ))}
+        <div className="admin-sidebar-divider" />
+        <p className="admin-sidebar-group-label">GAME COMMAND CENTERS</p>
+        {gameSections.map(s => (
+          <button
+            key={s.key}
+            className={active === s.key ? 'active' : ''}
+            onClick={() => handleNav(s.key)}
+            style={active === s.key ? { borderLeftColor: s.color, color: s.color, background: `${s.color}18` } : {}}
+          >
             {s.label}
           </button>
         ))}

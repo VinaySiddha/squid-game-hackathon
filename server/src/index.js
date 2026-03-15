@@ -4,6 +4,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import swaggerUi from 'swagger-ui-express';
+import swaggerDocument from './swagger.js';
 import multer from 'multer';
 import sharp from 'sharp';
 import { initSocket, getIO } from './socket.js';
@@ -17,6 +19,9 @@ import teamsRoutes from './routes/teams.js';
 import emailsRoutes from './routes/emails.js';
 import timerRoutes from './routes/timer.js';
 import settingsRoutes from './routes/settings.js';
+import importRoutes from './routes/import.js';
+import gameRoutes from './routes/game.js';
+import { setGameState } from './gameState.js';
 
 dotenv.config();
 
@@ -27,12 +32,13 @@ const httpServer = createServer(app);
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 app.use(cors({ origin: FRONTEND_URL }));
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
 initSocket(httpServer, FRONTEND_URL);
 
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize:  30 * 1024 * 1024 } });
 
 app.use('/api', healthRoutes);
 app.use('/api', adminRoutes);
@@ -42,6 +48,8 @@ app.use('/api', teamsRoutes);
 app.use('/api', emailsRoutes);
 app.use('/api', timerRoutes);
 app.use('/api', settingsRoutes);
+app.use('/api', importRoutes);
+app.use('/api', gameRoutes);
 
 // POST /api/checkin — check in a participant with photo upload
 app.post('/api/checkin', authMiddleware, upload.single('photo'), async (req, res) => {
@@ -89,6 +97,29 @@ app.post('/api/checkin', authMiddleware, upload.single('photo'), async (req, res
 const PORT = process.env.PORT || 3001;
 httpServer.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+
+  // Recover active game session on server restart
+  (async () => {
+    try {
+      const [sessions] = await pool.query(
+        "SELECT * FROM game_sessions WHERE status = 'active' LIMIT 1"
+      );
+      if (sessions.length > 0) {
+        const session = sessions[0];
+        const config = typeof session.config === 'string' ? JSON.parse(session.config) : session.config;
+        setGameState({
+          sessionId: session.id,
+          gameType: session.game_type,
+          config,
+          status: 'active',
+          currentSignal: session.current_signal,
+        });
+        console.log(`Recovered active game session ${session.id}`);
+      }
+    } catch (err) {
+      console.error('Game recovery failed:', err);
+    }
+  })();
 });
 
 export { app, httpServer };

@@ -49,6 +49,20 @@
   background: rgba(233, 30, 123, 0.1);
 }
 
+.admin-sidebar-divider {
+  height: 1px;
+  background: #333;
+  margin: 12px 20px;
+}
+
+.admin-sidebar-group-label {
+  font-family: var(--font-number);
+  font-size: 10px;
+  color: #555;
+  letter-spacing: 2px;
+  padding: 8px 20px 4px;
+}
+
 .admin-sidebar .logout-btn {
   margin-top: auto;
   color: var(--sg-red);

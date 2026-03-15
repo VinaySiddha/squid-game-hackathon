@@ -1,0 +1,198 @@
+.levels-page {
+  width: 100vw;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  background: var(--sg-black-deep);
+}
+
+.levels-bg {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(233, 30, 123, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 50%, rgba(201, 168, 76, 0.04) 0%, transparent 50%),
+    var(--sg-black-deep);
+  z-index: 0;
+}
+
+/* Header */
+.levels-header {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding-top: 60px;
+  margin-bottom: 50px;
+}
+
+.levels-header .sg-shapes {
+  margin-bottom: 12px;
+  opacity: 0.7;
+}
+
+.levels-header svg {
+  filter: drop-shadow(0 0 10px var(--sg-pink));
+}
+
+.levels-title {
+  font-family: var(--font-number);
+  font-size: 56px;
+  color: var(--sg-pink);
+  text-shadow: 0 0 40px rgba(233, 30, 123, 0.5), 0 0 80px rgba(233, 30, 123, 0.2);
+  letter-spacing: 10px;
+  margin-bottom: 6px;
+  animation: levelsGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes levelsGlow {
+  from { text-shadow: 0 0 30px rgba(233, 30, 123, 0.3), 0 0 60px rgba(233, 30, 123, 0.15); }
+  to { text-shadow: 0 0 50px rgba(233, 30, 123, 0.6), 0 0 100px rgba(233, 30, 123, 0.3); }
+}
+
+.levels-subtitle {
+  font-family: var(--font-number);
+  font-size: 14px;
+  color: var(--sg-gold);
+  letter-spacing: 6px;
+  text-transform: uppercase;
+}
+
+.levels-line {
+  width: 50px;
+  height: 2px;
+  background: var(--sg-pink);
+  margin: 18px auto 0;
+  box-shadow: 0 0 8px var(--sg-pink);
+}
+
+/* Grid */
+.levels-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  padding: 0 40px 60px;
+  max-width: 1100px;
+  width: 100%;
+}
+
+/* Card */
+.level-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 36px 24px 32px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+  overflow: hidden;
+}
+
+.level-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  border-color: var(--level-color);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.level-card-glow {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at center, var(--level-color), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.level-card:hover .level-card-glow {
+  opacity: 0.06;
+}
+
+.level-number {
+  font-family: var(--font-number);
+  font-size: 42px;
+  color: var(--level-color);
+  opacity: 0.15;
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.level-icon {
+  font-size: 48px;
+  margin-bottom: 18px;
+  filter: grayscale(0.2);
+  transition: filter 0.3s ease, transform 0.3s ease;
+}
+
+.level-card:hover .level-icon {
+  filter: grayscale(0);
+  transform: scale(1.1);
+}
+
+.level-title {
+  font-family: var(--font-number);
+  font-size: 16px;
+  color: var(--sg-white);
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+  transition: color 0.3s ease;
+}
+
+.level-card:hover .level-title {
+  color: var(--level-color);
+}
+
+.level-subtitle {
+  font-size: 12px;
+  color: var(--sg-gray);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.level-border {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 2px;
+  background: var(--level-color);
+  box-shadow: 0 0 10px var(--level-color);
+  transition: width 0.4s ease;
+}
+
+.level-card:hover .level-border {
+  width: 60%;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .levels-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    padding: 0 24px 40px;
+  }
+  .levels-title { font-size: 36px; letter-spacing: 6px; }
+  .levels-header { padding-top: 40px; margin-bottom: 36px; }
+}
+
+@media (max-width: 500px) {
+  .levels-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 0 16px 32px;
+  }
+  .levels-title { font-size: 28px; letter-spacing: 4px; }
+  .levels-subtitle { font-size: 11px; letter-spacing: 4px; }
+  .level-card { padding: 28px 20px 24px; }
+}

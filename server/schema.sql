@@ -53,3 +53,33 @@ INSERT INTO settings (`key`, value) VALUES
     ('timer_running', 'false'),
     ('timer_paused_remaining', NULL)
 ON DUPLICATE KEY UPDATE `key` = `key`;
+
+-- Game Sessions (shared across all 4 games)
+CREATE TABLE IF NOT EXISTS game_sessions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    game_type ENUM('rlgl', 'dalgona', 'mingle', 'tugofwar', 'glassbridge') NOT NULL,
+    config JSON NOT NULL,
+    status ENUM('waiting', 'active', 'finished') DEFAULT 'waiting',
+    current_signal ENUM('red', 'green') DEFAULT 'green',
+    started_at DATETIME NULL,
+    ended_at DATETIME NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Game Players (tracks each player's state within a session)
+CREATE TABLE IF NOT EXISTS game_players (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    session_id INT NOT NULL,
+    participant_id INT NOT NULL,
+    team_id INT NULL,
+    progress INT DEFAULT 0,
+    strikes_used INT DEFAULT 0,
+    is_finished BOOLEAN DEFAULT FALSE,
+    is_eliminated BOOLEAN DEFAULT FALSE,
+    eliminated_reason VARCHAR(100) NULL,
+    extra JSON NULL,
+    finished_at DATETIME NULL,
+    FOREIGN KEY (session_id) REFERENCES game_sessions(id) ON DELETE CASCADE,
+    FOREIGN KEY (participant_id) REFERENCES participants(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_session_participant (session_id, participant_id)
+);

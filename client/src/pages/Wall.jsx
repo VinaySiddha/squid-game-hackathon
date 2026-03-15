@@ -8,8 +8,6 @@ import CelebrationPopup from '../components/CelebrationPopup';
 import './Wall.css';
 
 function computeGrid(total) {
-  // Find best columns x rows that fits 1920x1080 (16:9)
-  // Target aspect ratio per tile ~ 1.0-1.5 (portrait-ish)
   let bestCols = 20;
   for (let cols = Math.ceil(Math.sqrt(total * 16 / 9)); cols >= 5; cols--) {
     const rows = Math.ceil(total / cols);
@@ -30,7 +28,13 @@ export default function Wall() {
   const [expired, setExpired] = useState(false);
   const [announcement, setAnnouncement] = useState(null);
   const [showTimer, setShowTimer] = useState(false);
+  const [mingleDice, setMingleDice] = useState(null);
+  const [gameSoundsMuted, setGameSoundsMuted] = useState(false);
   const audioRef = useRef(null);
+  const gameSoundsMutedRef = useRef(false);
+
+  // Keep ref in sync with state (so socket callbacks see latest value)
+  useEffect(() => { gameSoundsMutedRef.current = gameSoundsMuted; }, [gameSoundsMuted]);
 
   const fetchAll = useCallback(async () => {
     try {
@@ -74,14 +78,21 @@ export default function Wall() {
       setParticipants(prev => prev.map(existing =>
         existing.player_number === p.player_number ? { ...existing, ...p } : existing
       ));
-      audioRef.current?.playSFX('checkin');
+      if (!gameSoundsMutedRef.current) audioRef.current?.playSFX('checkin');
     });
 
     socket.on('participant:eliminate', (p) => {
       setParticipants(prev => prev.map(existing =>
         existing.id === p.id ? { ...existing, is_alive: false } : existing
       ));
-      audioRef.current?.playSFX('eliminate');
+      if (!gameSoundsMutedRef.current) {
+        audioRef.current?.playSFX('gunshot');
+        if (p.player_number) {
+          setTimeout(() => {
+            audioRef.current?.playPlayerAnnouncement(p.player_number);
+          }, 500);
+        }
+      }
     });
 
     socket.on('participant:revive', (p) => {
@@ -95,7 +106,7 @@ export default function Wall() {
       setParticipants(prev => prev.map(existing =>
         ids.has(existing.id) ? { ...existing, is_alive: false } : existing
       ));
-      audioRef.current?.playSFX('eliminate');
+      if (!gameSoundsMutedRef.current) audioRef.current?.playSFX('eliminate');
     });
 
     socket.on('timer:update', (state) => {
@@ -107,13 +118,89 @@ export default function Wall() {
       setShowTimer(visible);
     });
 
+    socket.on('panel:mute-game-sounds', (muted) => {
+      setGameSoundsMuted(muted);
+    });
+
     socket.on('announce', (data) => {
+      if (data.type === 'dismiss') {
+        setAnnouncement(null);
+        return;
+      }
       setParticipants(prev => {
         const num = String(data.player_number).padStart(3, '0');
         const found = prev.find(p => p.player_number === num);
-        setAnnouncement({ ...data, photo_url: found?.photo_url || null });
+        setAnnouncement({ ...data, player_number: num, photo_url: found?.photo_url || null });
         return prev;
       });
+    });
+
+    // ─── Game audio on cinema panel ───
+    let dollBgm = null;
+    let mingleSong = null;
+
+    socket.on('game:start', (data) => {
+      if (gameSoundsMutedRef.current) return;
+      if (data.gameType === 'rlgl') {
+        dollBgm = new Audio('/uploads/SquidGameAudios/sfx/Doll Earrape Green light Red light.mp3');
+        dollBgm.loop = true;
+        dollBgm.volume = 0.5;
+        dollBgm.play().catch(() => {});
+      }
+      if (data.gameType === 'mingle') {
+        mingleSong = new Audio('/audio/mingle-game-song(dunggeulge dunggeulge).mp3.mpeg');
+        mingleSong.loop = true;
+        mingleSong.volume = 0.5;
+        mingleSong.play().catch(() => {});
+      }
+    });
+
+    socket.on('game:signal', ({ signal }) => {
+      if (gameSoundsMutedRef.current) return;
+      if (dollBgm) {
+        if (signal === 'green') {
+          dollBgm.play().catch(() => {});
+        } else {
+          dollBgm.pause();
+        }
+      }
+    });
+
+    socket.on('game:mingle-round', ({ number }) => {
+      if (mingleSong) mingleSong.pause();
+
+      setMingleDice({ rolling: true, number: 0 });
+
+      if (!gameSoundsMutedRef.current) {
+        const drumroll = new Audio('/uploads/SquidGameAudios/sfx/Drum roll.mp3');
+        drumroll.play().catch(() => {});
+      }
+
+      let count = 0;
+      const maxCount = 30;
+      const diceInterval = setInterval(() => {
+        count++;
+        setMingleDice({ rolling: true, number: Math.floor(Math.random() * 9) + 2 });
+        if (count >= maxCount) {
+          clearInterval(diceInterval);
+          setMingleDice({ rolling: false, number });
+          if (!gameSoundsMutedRef.current) {
+            const whistle = new Audio('/uploads/SquidGameAudios/sfx/Whistle blow.mp3');
+            whistle.play().catch(() => {});
+          }
+          setTimeout(() => setMingleDice(null), 3000);
+        }
+      }, 60);
+    });
+
+    socket.on('game:mingle-round-end', () => {
+      if (!gameSoundsMutedRef.current && mingleSong) mingleSong.play().catch(() => {});
+    });
+
+    socket.on('game:end', () => {
+      if (dollBgm) { dollBgm.pause(); dollBgm = null; }
+      if (mingleSong) { mingleSong.pause(); mingleSong = null; }
+      setMingleDice(null);
     });
 
     return () => {
@@ -124,19 +211,25 @@ export default function Wall() {
       socket.off('timer:update');
       socket.off('timer:show');
       socket.off('announce');
+      socket.off('panel:mute-game-sounds');
+      socket.off('game:start');
+      socket.off('game:signal');
+      socket.off('game:mingle-round');
+      socket.off('game:mingle-round-end');
+      socket.off('game:end');
       socket.off('reconnect');
+      if (dollBgm) { dollBgm.pause(); dollBgm = null; }
+      if (mingleSong) { mingleSong.pause(); mingleSong = null; }
       socket.disconnect();
     };
   }, [fetchAll]);
 
-  // Only show slots that exist in DB — deleted numbers disappear from grid
   const grid = participants
     .filter(p => p.player_number)
     .sort((a, b) => a.player_number.localeCompare(b.player_number));
 
   const slotCount = grid.length || totalSlots;
   const { cols, rows } = computeGrid(slotCount);
-  const aliveCount = participants.filter(p => p.is_alive && p.is_checked_in).length;
 
   const handleStart = () => {
     setStarted(true);
@@ -144,18 +237,27 @@ export default function Wall() {
 
   const handleTimerExpire = useCallback(() => {
     setExpired(true);
-    audioRef.current?.playSFX('timesup');
+    if (!gameSoundsMutedRef.current) audioRef.current?.playSFX('timesup');
   }, []);
 
-  const { playSFX } = useAudioPlayer({ socket: started ? socket : null, autoPlay: started });
-  audioRef.current = { playSFX };
+  // Audio player — always listen to socket (not just when started)
+  // This ensures admin Audio Center tracks/SFX play on the panel
+  const { playSFX, playPlayerAnnouncement } = useAudioPlayer({ socket, autoPlay: started });
+  audioRef.current = { playSFX, playPlayerAnnouncement };
 
   if (!started) {
     return (
       <div className="wall-start-overlay" onClick={handleStart}>
-        <SquidShapes size={40} />
-        <h1>SQUID GAME</h1>
-        <p>Click anywhere to start</p>
+        <div className="wall-start-bg" />
+        <div className="wall-start-content">
+          <div className="wall-start-shapes">
+            <SquidShapes size={32} />
+          </div>
+          <h1 className="wall-start-title">SQUID GAME</h1>
+          <p className="wall-start-subtitle">HACKATHON 2026</p>
+          <div className="wall-start-line" />
+          <p className="wall-start-prompt">Click anywhere to enter the arena</p>
+        </div>
       </div>
     );
   }
@@ -176,7 +278,6 @@ export default function Wall() {
           <PlayerTile key={p.player_number} participant={p} />
         ))}
       </div>
-
 
       {showTimer && (
         <div className="wall-timer-overlay">
@@ -201,6 +302,19 @@ export default function Wall() {
           photoUrl={announcement.photo_url}
           onClose={() => setAnnouncement(null)}
         />
+      )}
+
+      {/* Mingle Dice Roll Overlay */}
+      {mingleDice && (
+        <div className="wall-dice-overlay">
+          <div className="wall-dice-label">FORM GROUPS OF</div>
+          <div className={`wall-dice ${mingleDice.rolling ? 'rolling' : 'landed'}`}>
+            <span className="wall-dice-number">{mingleDice.number}</span>
+          </div>
+          {!mingleDice.rolling && (
+            <div className="wall-dice-result-text">GO!</div>
+          )}
+        </div>
       )}
     </div>
   );

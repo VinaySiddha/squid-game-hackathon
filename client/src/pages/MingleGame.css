@@ -1,0 +1,114 @@
+.mingle-page {
+  width: 100vw; min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: var(--sg-black-deep); padding: 20px; position: relative;
+}
+.mingle-playing { justify-content: flex-start; padding-top: 30px; }
+
+.mingle-login, .mingle-lobby { text-align: center; }
+.mingle-title {
+  font-family: var(--font-number); font-size: 42px; color: #d4a03c;
+  text-shadow: 0 0 40px rgba(212,160,60,0.4); letter-spacing: 6px;
+  margin-bottom: 12px; line-height: 1.1;
+}
+.mingle-subtitle { color: var(--sg-gray); margin-bottom: 24px; letter-spacing: 2px; }
+.mingle-input {
+  display: block; width: 200px; margin: 0 auto 16px; padding: 12px 16px;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px; color: var(--sg-white); font-size: 24px;
+  font-family: var(--font-number); text-align: center; letter-spacing: 8px;
+}
+.mingle-input:focus { outline: none; border-color: #d4a03c; }
+.mingle-btn {
+  padding: 12px 32px; background: #d4a03c; color: #1a1200; border: none;
+  border-radius: 8px; font-family: var(--font-number); font-size: 16px;
+  cursor: pointer; letter-spacing: 2px; font-weight: bold;
+}
+.mingle-btn:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(212,160,60,0.4); }
+.mingle-player-badge { font-family: var(--font-number); font-size: 20px; color: var(--sg-gold); margin-bottom: 20px; }
+.mingle-waiting { color: var(--sg-gray); letter-spacing: 2px; margin-bottom: 20px; }
+.mingle-pulse-dot {
+  width: 12px; height: 12px; background: #d4a03c; border-radius: 50%; margin: 0 auto;
+  animation: mPulse 1.5s ease-in-out infinite;
+}
+@keyframes mPulse { 0%,100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 1; transform: scale(1.5); } }
+
+/* Timer */
+.mingle-timer { font-family: var(--font-number); font-size: 48px; color: var(--sg-white); margin-bottom: 16px; letter-spacing: 4px; }
+
+/* Game label */
+.mingle-game-label { text-align: center; margin-bottom: 20px; }
+.mingle-game-tag {
+  font-family: var(--font-number); font-size: 18px; color: #d4a03c;
+  letter-spacing: 3px; display: block; margin-bottom: 6px;
+}
+.mingle-game-hint { font-size: 13px; color: var(--sg-gray); letter-spacing: 1px; }
+.mingle-game-hint.mingle-warning { color: #ff6b6b; animation: warnBlink 1s ease-in-out infinite; }
+@keyframes warnBlink { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+/* Passage */
+.mingle-passage {
+  max-width: 700px; width: 100%;
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px; padding: 24px; font-size: 22px; line-height: 1.8;
+  font-family: var(--font-body); margin-bottom: 20px; min-height: 120px; word-wrap: break-word;
+}
+.mingle-char { color: rgba(255,255,255,0.4); transition: all 0.3s; }
+.mingle-char.correct { color: #00ff66; }
+.mingle-char.hidden {
+  color: transparent; background: rgba(212,160,60,0.15); border-radius: 2px;
+  text-shadow: none;
+}
+.mingle-char.cursor { border-left: 2px solid #d4a03c; animation: mBlink 1s step-end infinite; }
+.mingle-char.cursor.wrong-flash {
+  color: #ff0040; background: rgba(255,0,64,0.2); border-radius: 2px;
+  animation: mShake 0.3s ease-out;
+}
+@keyframes mBlink { 50% { border-left-color: transparent; } }
+@keyframes mShake {
+  0%,100% { transform: translateX(0); } 25% { transform: translateX(-3px); }
+  50% { transform: translateX(3px); } 75% { transform: translateX(-2px); }
+}
+
+/* Progress */
+.mingle-progress-bar {
+  width: 100%; max-width: 700px; height: 8px;
+  background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; position: relative;
+}
+.mingle-progress-fill {
+  height: 100%; background: linear-gradient(90deg, #d4a03c, #e8c547);
+  border-radius: 4px; transition: width 0.3s ease;
+}
+.mingle-progress-text {
+  position: absolute; right: 0; top: 12px;
+  font-family: var(--font-number); font-size: 14px; color: var(--sg-gray);
+}
+.mingle-hidden-input { position: absolute; opacity: 0; width: 0; height: 0; }
+
+/* Result */
+.mingle-result, .mingle-eliminated { text-align: center; }
+.mingle-result-icon { font-size: 80px; margin-bottom: 16px; }
+.mingle-result.survived .mingle-result-icon { color: #00ff66; }
+.mingle-result.dead .mingle-result-icon { color: #ff0040; }
+.mingle-result h1 { font-family: var(--font-number); font-size: 48px; letter-spacing: 6px; margin-bottom: 12px; }
+.mingle-result.survived h1 { color: #00ff66; }
+.mingle-result.dead h1 { color: #ff0040; }
+.mingle-result p { color: var(--sg-gray); margin-bottom: 8px; }
+.mingle-result-progress { font-family: var(--font-number); font-size: 18px; color: var(--sg-gold); }
+.mingle-survive-bg { background: radial-gradient(ellipse at center, #0d1a00 0%, var(--sg-black-deep) 70%); }
+.mingle-confetti { position: fixed; inset: 0; pointer-events: none; z-index: 10; overflow: hidden; }
+.mingle-confetti-piece { position: absolute; top: -20px; border-radius: 2px; animation: mFall linear forwards; opacity: 0.9; }
+@keyframes mFall { 0% { transform: translateY(0) rotate(0); opacity:1; } 100% { transform: translateY(100vh) rotate(720deg); opacity:0; } }
+.mingle-bounce { animation: mBounce 0.8s ease-out; }
+@keyframes mBounce { 0% { transform: scale(0); opacity:0; } 50% { transform: scale(1.3); } 70% { transform: scale(0.9); } 100% { transform: scale(1); opacity:1; } }
+.mingle-result-badge { font-family: var(--font-number); font-size: 24px; color: var(--sg-gold); margin-top: 12px; letter-spacing: 3px; }
+.mingle-x { font-size: 100px; color: #ff0040; margin-bottom: 16px; }
+.mingle-eliminated h1 { font-family: var(--font-number); font-size: 48px; color: #ff0040; letter-spacing: 6px; margin-bottom: 12px; }
+.mingle-eliminated p { color: var(--sg-gray); }
+
+@media (max-width: 600px) {
+  .mingle-title { font-size: 28px; letter-spacing: 3px; }
+  .mingle-timer { font-size: 32px; }
+  .mingle-passage { font-size: 16px; padding: 16px; }
+  .mingle-result h1 { font-size: 32px; }
+}

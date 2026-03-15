@@ -1,16 +1,25 @@
 import { useState, useEffect } from 'react';
 import { apiFetch } from '../../api';
+import socket from '../../socket';
 
 export default function Settings() {
   const [total, setTotal] = useState('');
   const [saved, setSaved] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [gameSoundsMuted, setGameSoundsMuted] = useState(false);
 
   useEffect(() => {
+    socket.connect();
     apiFetch('/settings/total-participants')
       .then(data => setTotal(String(data.total_participants)))
       .catch(() => setTotal('300'));
   }, []);
+
+  const toggleGameSounds = () => {
+    const next = !gameSoundsMuted;
+    setGameSoundsMuted(next);
+    socket.emit('panel:mute-game-sounds', next);
+  };
 
   const handleSave = async () => {
     setLoading(true);
@@ -31,6 +40,29 @@ export default function Settings() {
   return (
     <div>
       <h1>SETTINGS</h1>
+
+      {/* Panel Game Sounds */}
+      <div style={{ marginBottom: 24 }}>
+        <h3 style={{ color: 'var(--sg-pink)', fontSize: 13, letterSpacing: 2, marginBottom: 8 }}>
+          PANEL GAME SOUNDS
+        </h3>
+        <p style={{ color: '#888', fontSize: 13, marginBottom: 12 }}>
+          Toggle game sounds (elimination announcements, doll BGM, signal SFX) on the cinema panel. Audio Center tracks are not affected.
+        </p>
+        <button
+          onClick={toggleGameSounds}
+          style={{
+            padding: '12px 28px',
+            background: gameSoundsMuted ? '#ff0040' : '#067a52',
+            color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer',
+            fontSize: 16, fontFamily: 'var(--font-number)', letterSpacing: 2,
+            boxShadow: gameSoundsMuted ? '0 0 15px rgba(255,0,64,0.3)' : '0 0 15px rgba(6,122,82,0.3)',
+            transition: 'all 0.2s',
+          }}
+        >
+          {gameSoundsMuted ? '🔇 GAME SOUNDS OFF' : '🔊 GAME SOUNDS ON'}
+        </button>
+      </div>
 
       <div style={{ marginBottom: 24 }}>
         <h3 style={{ color: 'var(--sg-pink)', fontSize: 13, letterSpacing: 2, marginBottom: 8 }}>
